@@ -30,7 +30,7 @@ public static class AuctionExtensions
 
     public static List<AuctionDto> ToDtoList(this List<Auction> auctions)
     {
-        return auctions.Select(a => a.ToDto()).ToList();
+        return [.. auctions.Select(a => a.ToDto())];
     }
 
     public static Auction ToEntity(this CreateAuctionDto dto)

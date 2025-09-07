@@ -7,14 +7,9 @@ namespace AuctionService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuctionsController : ControllerBase
+public class AuctionsController(AuctionDbContext context) : ControllerBase
 {
-    private readonly AuctionDbContext _context;
-
-    public AuctionsController(AuctionDbContext context)
-    {
-        _context = context;
-    }
+    private readonly AuctionDbContext _context = context;
 
     [HttpGet]
     public async Task<ActionResult<List<AuctionDto>>> GetAllAuctions()
