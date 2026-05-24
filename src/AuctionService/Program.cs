@@ -14,6 +14,7 @@ builder.Services.AddDbContext<AuctionDbContext>(opt =>
 
 var app = builder.Build();
 
+
 app.UseHttpsRedirection();
 
 app.MapControllers();
