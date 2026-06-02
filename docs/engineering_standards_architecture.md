@@ -1,47 +1,51 @@
-# Engineering Standards & Architecture Patterns
+# Engineering Standards and Architecture Patterns
 
-This document outlines the core architectural patterns, deployment strategies, and database management standards for our .NET and React ecosystem.
+This document collects engineering patterns that are useful for the broader Carsties microservices project.
 
-## 1. Zero-Downtime Deployments & Health Checks
+Some sections are future-facing reference material. The current tutorial services still use controllers, EF Core migrations, Postgres, MongoDB, RabbitMQ, and Docker Compose.
 
-We utilize Azure Deployment Slots combined with a rigorous Health API to ensure deployments never cause production downtime or route traffic to broken code.
+## Zero-Downtime Deployments and Health Checks
 
-### Deployment Slots & Sticky Settings
+For production deployments, use deployment slots and health checks to avoid routing traffic to broken code.
 
-We maintain strict environment isolation using Azure App Service/Function deployment slots:
+### Deployment Slots and Sticky Settings
 
-* **Staging Slot:** Pointed strictly at the Staging Database using **Slot-Sticky Settings**.
-* **Production Slot:** Pointed strictly at the Production Database.
+When deploying to Azure App Service or Azure Functions:
 
-Code is deployed to the Staging slot first. Integration tests run against the staging environment without touching production data. If tests pass, Azure performs a VIP (Virtual IP) swap, instantly routing live traffic to the new code.
+- **Staging slot:** Points to the staging database using slot-sticky settings.
+- **Production slot:** Points to the production database.
 
-### The `/healthz` Gatekeeper
+Deploy code to staging first, run integration checks there, then swap staging into production only after the service is healthy.
 
-Before Azure swaps the Staging slot to Production, it pings the `GET /healthz` endpoint. This endpoint does not just return `200 OK`; it actively verifies infrastructure.
+### `/healthz` Gatekeeper
+
+Before a slot swap, the platform should call `GET /healthz`. The endpoint should verify infrastructure, not just return `200 OK`.
 
 | Check Type | Target | Failure Action |
 | --- | --- | --- |
 | **Database** | `SELECT 1` via EF Core | Fails health check, aborts swap |
-| **Storage** | Queue permissions & connectivity | Fails health check, aborts swap |
+| **Storage or broker** | Queue permissions and connectivity | Fails health check, aborts swap |
 | **Secrets** | Azure Key Vault access | Fails health check, aborts swap |
 
 ---
 
-## 2. Database Migration Strategy (DbUp)
+## Database Migration Strategy
 
-We manage database schema and structural data using **DbUp**, executed via a standalone .NET Console project (`Database.csproj`). We do not use Entity Framework Migrations.
+The current tutorial service uses **EF Core migrations** for `AuctionService`. Keep migrations small, reviewable, and tied to the service that owns the database.
 
 ### Local Development Isolation
 
-Developers must never share a local database. We treat local databases as disposable resources using Docker.
+Developers should not share local databases. Treat local databases as disposable resources managed by Docker Compose.
 
-1. **Boot DB:** `docker compose up -d` spins up an empty SQL Server container.
-2. **Migrate:** `dotnet run` on the `Database` project applies all scripts.
-3. **Reset:** If schema state gets corrupted, run `docker compose down -v` and restart.
+1. **Boot databases:** `docker compose up -d` starts Postgres, MongoDB, and RabbitMQ.
+2. **Apply migrations:** Run the service or use `dotnet ef database update` for EF Core-backed services.
+3. **Reset local state:** If schema or data state gets corrupted, run `docker compose down -v` and start again.
 
-### Migration Script Organization
+### DbUp Reference Pattern
 
-Scripts are written in raw SQL and must be immutable once merged to `main`. They are organized into three distinct execution folders:
+DbUp can still be useful for larger systems where schema changes and seed/config data should be managed by a standalone database project. If adopted later, use timestamped SQL scripts and keep merged scripts immutable.
+
+Recommended organization:
 
 ```text
 DatabaseProject/
@@ -52,15 +56,17 @@ DatabaseProject/
 
 ```
 
-**Rule:** Always use timestamps (`YYYYMMDDHHMM_Description.sql`) for schema files to completely eliminate merge conflicts when multiple developers are creating tables simultaneously.
+Use timestamps (`YYYYMMDDHHMM_Description.sql`) for schema files to reduce merge conflicts when multiple developers add database changes.
 
 ---
 
-## 3. The Natural Key Pattern (Preventing ID Collisions)
+## Natural Key Pattern
 
-To prevent the "Dual-Authority" problem—where local developers and production administrators accidentally generate conflicting integer IDs (`Id = 42`) for configuration data—we strictly separate database relationships from application logic.
+Use natural keys for cross-environment configuration data to avoid ID collisions.
 
-### Database Schema (Two-Key Hybrid)
+This avoids the "dual authority" problem where local developers and production administrators can accidentally generate conflicting integer IDs for configuration records.
+
+### Two-Key Hybrid Schema
 
 Transactional tables join on integers for performance, but configuration tables expose a unique `VARCHAR` Natural Key for cross-environment synchronization.
 
@@ -72,7 +78,7 @@ Transactional tables join on integers for performance, but configuration tables 
 
 ### C# Smart Enums
 
-Application logic **never** references database integer IDs. We use the Smart Enum pattern to bind business logic to the immutable Natural Key.
+Application logic should not reference database integer IDs for configuration values. Use the Smart Enum pattern to bind business logic to immutable natural keys.
 
 ```csharp
 public sealed class MemberFirm : SmartEnum<MemberFirm, string>
@@ -87,11 +93,11 @@ public sealed class MemberFirm : SmartEnum<MemberFirm, string>
 
 ---
 
-## 4. Hybrid Localization Strategy
+## Hybrid Localization Strategy
 
-We support multi-language interfaces without bottlenecking the database or complicating API caching. We use a hybrid model based on the origin of the data.
+For multi-language interfaces, use a hybrid model based on the origin of the data.
 
-### The API Data Contract
+### API Data Contract
 
 Dropdowns and lookup lists return a standardized DTO supporting both frontend and backend translation:
 
@@ -104,10 +110,10 @@ Dropdowns and lookup lists return a standardized DTO supporting both frontend an
 
 ```
 
-### Routing the Translation (React Component)
+### Routing Translation
 
-* **System Data (DbUp Seeded):** Sends a `labelKey`. The React frontend translates it instantly using local `i18n` JSON files. This allows the API to be aggressively cached on a CDN.
-* **Admin Data (User Generated):** Sends a `directLabel`. For dynamic data created via the Admin Panel, the .NET Web API handles the translation via SQL joins and returns the raw string.
+- **System data:** Sends a `labelKey`. The React frontend translates it with local `i18n` JSON files, which keeps API responses cache-friendly.
+- **Admin data:** Sends a `directLabel`. Dynamic data created by users can be translated or returned directly by the API.
 
 ```tsx
 const SmartDropdown = ({ options }) => {
@@ -128,12 +134,15 @@ const SmartDropdown = ({ options }) => {
 
 ---
 
-## 5. Minimal APIs & Result Handling
+## Minimal APIs and Result Handling
 
-We use **Minimal APIs** as the primary delivery mechanism for our microservices, keeping the HTTP layer lightweight and strictly decoupled from business logic.
+The current services use ASP.NET Core controllers. If we move to Minimal APIs later, keep the HTTP layer lightweight and delegate business logic to the service or application layer.
 
 ### Endpoint Organization
-Endpoints must not contain business logic. They act as thin wrappers routing HTTP requests to the Service or Application layer (e.g., MediatR or Repositories). Endpoints should be organized using Extension Methods on `IEndpointRouteBuilder` to prevent `Program.cs` bloat.
+
+Endpoints should not contain business logic. They should route HTTP requests to the service or application layer.
+
+For Minimal APIs, organize endpoints with extension methods on `IEndpointRouteBuilder` to keep `Program.cs` focused on application setup.
 
 ```csharp
 public static class OrderEndpoints
@@ -153,30 +162,30 @@ public static class OrderEndpoints
 ```
 
 ### The Result Pattern (FluentResults)
-We use the **Result Pattern** (`FluentResults`) in the Application layer to handle success, failure, and validation without throwing exceptions for control flow.
 
-All `Result<T>` objects returned from the Service layer must be converted to standard HTTP responses using a global extension method (`ToHttpResult`). This ensures consistent JSON structures (like `ValidationProblemDetails`) for the frontend.
+When using the Result Pattern, return `Result<T>` from the application layer for expected success/failure flows. Convert those results to HTTP responses in the API layer with a shared extension such as `ToHttpResult`.
 
-#### Standardized API Responses
-The API layer maps the `Result` into a predictable structure:
-* **Success:** Returns HTTP `200 OK`, `201 Created`, or `204 No Content` with the raw JSON body.
-* **Failure (e.g., Validation, NotFound, Forbidden):** Returns the appropriate HTTP status code (`400`, `404`, `403`) mapped to a standard `ProblemDetails` JSON envelope containing the `Errors` array and metadata parameters.
+### Standardized API Responses
+
+The API layer should map results into predictable HTTP responses:
+
+- **Success:** Return `200 OK`, `201 Created`, or `204 No Content`.
+- **Failure:** Return an appropriate status code such as `400`, `403`, or `404` using a standard `ProblemDetails` envelope.
 
 ```csharp
 // Example Extension Method snippet
 public static IResult ToHttpResult<T>(this Result<T> result)
 {
     if (result.IsSuccess) return Results.Ok(result.Value);
-    
+
     // Maps internal Enum ErrorType to HTTP Status Codes and ProblemDetails
     return MapErrorsToProblemDetails(result.Errors);
 }
 ```
 
-### Alternative Endpoint Organization: The Carter Library
-As an alternative to manual extension methods, we can utilize the **Carter** NuGet package (`Carter`). Carter enforces a standardized structure for Minimal APIs, making them feel as organized as Controllers without sacrificing performance.
+### Carter Reference
 
-When using Carter, endpoints are defined by implementing the `ICarterModule` interface:
+Carter is an optional Minimal API organization library. Endpoints are defined by implementing `ICarterModule`:
 
 ```csharp
 using Carter;
@@ -190,7 +199,7 @@ public class AuctionEndpoints : ICarterModule
         var group = app.MapGroup("/api/auctions");
 
         // Keep business logic delegated to the Service/MediatR layer
-        group.MapPost("/", async (CreateAuctionDto dto, IAuctionService service) => 
+        group.MapPost("/", async (CreateAuctionDto dto, IAuctionService service) =>
         {
             var result = await service.CreateAuctionAsync(dto);
             return result.ToHttpResult();
@@ -199,7 +208,7 @@ public class AuctionEndpoints : ICarterModule
 }
 ```
 
-Carter automatically discovers all classes implementing `ICarterModule` across the assembly, meaning `Program.cs` stays perfectly clean with just a single registration call:
+Carter discovers modules across the assembly, keeping `Program.cs` clean:
 
 ```csharp
 // In Program.cs
@@ -211,18 +220,20 @@ app.MapCarter();
 
 ---
 
-## 6. Exceptions vs. Result Pattern
+## Exceptions vs. Result Pattern
 
-To maintain high performance and ensure clear separation between business logic and infrastructure, we enforce strict rules on when to throw Exceptions versus when to return a `Result.Fail`.
+Use exceptions for unexpected technical failures and the Result Pattern for expected business outcomes.
 
-### The Golden Rule
-* **Use the Result Pattern (`Result.Fail`)** for expected failures (e.g., validation errors, business rule violations, resource not found).
-* **Throw Exceptions** only for unexpected technical failures (e.g., database outages, null reference bugs, 500 errors from external APIs).
+### Golden Rule
+
+- **Use `Result.Fail`:** Validation errors, business rule violations, resource not found, forbidden actions.
+- **Throw exceptions:** Database outages, null reference bugs, infrastructure timeouts, unexpected external API failures.
 
 ### Database Operations
-Do **not** wrap general database commands in `try/catch` blocks. Let infrastructure exceptions (like timeouts or connection drops) bubble up to the Global Exception Handler to be logged as critical server errors and return a `500 Internal Server Error`.
 
-**The Exception:** You may use `try/catch` specifically to catch known constraint violations (like Unique Index violations) to translate them into friendly business errors:
+Do not wrap general database commands in broad `try/catch` blocks. Let infrastructure exceptions, such as timeouts or connection drops, bubble up to the global exception handler.
+
+The exception is a known constraint violation that should become a friendly business error:
 
 ```csharp
 public async Task<Result<User>> CreateUserAsync(User user)
@@ -243,29 +254,34 @@ public async Task<Result<User>> CreateUserAsync(User user)
 ```
 
 ### External API Calls (HTTP Clients)
-When communicating with other microservices or third-party APIs (like Stripe), handle failures based on the HTTP Status Code:
 
-1. **Infrastructure Failures (5xx or Timeouts):** Use `.EnsureSuccessStatusCode()` to throw an `HttpRequestException`. This allows resilience libraries like **Polly** to catch the exception, trigger retry policies, and eventually bubble up to the Global Exception Handler if the target remains offline.
-2. **Business Failures (4xx):** If the external API returns a 400 Bad Request or 422 Unprocessable Entity, do **not** throw. Parse their JSON error response and return a `Result.Fail` so the frontend can display the validation issue to the user.
+When communicating with other services, handle failures based on the HTTP status code:
+
+1. **Infrastructure failures:** For `5xx`, timeouts, or connection failures, throw an `HttpRequestException` so Polly or the global exception handler can process it.
+2. **Business failures:** For expected `4xx` responses, parse the error response and return `Result.Fail` so the frontend can show a useful message.
 
 ---
 
-## 7. Dynamic Type Dispatch (Avoiding Reflection)
+## Dynamic Type Dispatch
 
-We strictly prohibit the use of **Reflection** in high-performance or high-throughput areas of the application (such as queue processors or minimal API endpoints) due to its significant performance overhead and incompatibility with AOT (Ahead-of-Time) compilation.
+Avoid reflection in high-throughput areas such as queue processors and hot HTTP paths. Reflection can add overhead and complicate NativeAOT compatibility.
 
-When you need to dynamically route requests to different handlers or database tables based on a runtime value (e.g., routing an incoming queue message to the correct `DbSet<T>`), use one of the following two patterns:
+When routing dynamically based on runtime values, prefer explicit dispatch.
 
-### Pattern A: The DI Handler Registry (Strategy Pattern)
-Create an interface (`IRequestHandler`), implement it for each entity, and register all implementations in the DI container. At runtime, use a Dictionary to look up the correct handler in O(1) time. This satisfies the Open-Closed Principle without reflection.
+### Pattern A: DI Handler Registry
 
-### Pattern B: Source Generators (For maximum performance)
-For scenarios requiring raw execution speed, we utilize **Source Generators**. Instead of using reflection to find types at runtime, Source Generators analyze the code at compile-time and automatically generate standard `switch` statements for routing.
+Create an interface, implement it for each entity or message type, and register all implementations in DI. At runtime, use a dictionary to look up the correct handler.
+
+### Pattern B: Source Generators
+
+For maximum performance, source generators can analyze code at compile time and generate explicit `switch` statements or lookup tables.
 
 #### Viewing Generated Code
-A major benefit of Source Generators is transparency. The generated code is standard C# that can be inspected and debugged.
-* **In the IDE:** Navigate to `Dependencies -> Analyzers -> [GeneratorName]` in the Solution Explorer to view and place breakpoints in the `.g.cs` files.
-* **On Disk:** To force the compiler to save the generated files to the hard drive (for code reviews or inspection), add the following to the `.csproj`:
+
+Generated code is standard C# that can be inspected and debugged.
+
+- **In the IDE:** Navigate to `Dependencies -> Analyzers -> [GeneratorName]` in Solution Explorer.
+- **On disk:** To save generated files for review, add this to the `.csproj`:
 
 ```xml
 <PropertyGroup>

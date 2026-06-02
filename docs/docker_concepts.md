@@ -2,15 +2,15 @@
 
 ## Volumes
 
-In Docker, **volumes** are the preferred mechanism for saving data so that it isn't lost when a container shuts down or restarts.
+In Docker, **volumes** are the preferred mechanism for saving data so it is not lost when a container shuts down, restarts, or is recreated.
 
-By default, Docker containers are "ephemeral" (temporary). If a container deletes itself or crashes, all the files and data inside it disappear forever. For applications like databases, this would result in a complete loss of all users, items, and settings.
+By default, containers are ephemeral. If a database container is removed, any data stored only inside that container disappears too.
 
-A **Volume** solves this by storing the data safely on the host machine's hard drive, outside of the temporary container.
+A volume solves this by storing data on the Docker host, outside the temporary container filesystem.
 
-### Example: MongoDB in `docker-compose.yml`
+## Example: MongoDB in `docker-compose.yml`
 
-In our `docker-compose.yml`, we define volumes for our databases like this:
+The local compose file defines a named MongoDB volume like this:
 
 ```yaml
 services:
@@ -26,9 +26,26 @@ volumes:
 ```
 
 Here is how this works:
-1. **`mongodata`**: This is the named volume. It acts as a safe, persistent storage folder on the actual host machine (Docker completely manages where this lives internally).
-2. **`/data/db`**: This is the internal folder *inside* the MongoDB container where MongoDB naturally tries to save all its database files.
 
-By linking them together with the `:` symbol (`mongodata:/data/db`), we are telling Docker: *"Whenever MongoDB tries to write data into `/data/db`, actually save it into the permanent `mongodata` volume instead."* 
+1. **`mongodata`:** The named volume managed by Docker.
+2. **`/data/db`:** The path inside the MongoDB container where MongoDB stores database files.
 
-Because of this, the MongoDB container can be completely destroyed and recreated without any loss of data.
+The mapping `mongodata:/data/db` tells Docker to persist anything MongoDB writes to `/data/db` in the `mongodata` volume.
+
+Because of this, the MongoDB container can be destroyed and recreated without losing the database contents.
+
+## Resetting Local Data
+
+To remove the containers while keeping volumes:
+
+```bash
+docker compose down
+```
+
+To remove containers and delete the local database volumes:
+
+```bash
+docker compose down -v
+```
+
+Use `-v` carefully. It deletes the local Postgres and MongoDB data managed by the compose file.

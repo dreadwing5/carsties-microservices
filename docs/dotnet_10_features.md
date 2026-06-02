@@ -1,34 +1,57 @@
 # What's New in .NET 10
 
-.NET 10 is a Long-Term Support (LTS) release focused on performance optimizations, developer productivity, and expanded AI integration. 
+.NET 10 is a Long-Term Support (LTS) release focused on runtime performance, developer productivity, cloud-native development, and AI integration.
 
-Here are the key highlights and features introduced in .NET 10:
+## Language Improvements
 
-## 1. Language Improvements (C# 14 & F# 10)
-* **C# 14**:
-  * **Field-backed properties**: Allows using the `field` keyword to simplify property declarations without needing explicit backing fields.
-  * **File-based apps**: Run C# code directly from a single `Program.cs` file without a project or solution file. Useful for scripts and small utilities.
-  * **Other additions**: Null-conditional assignment, partial constructors, ref struct interface support, and collection expression extensions.
-* **F# 10**: Focuses on clarity and performance with scoped warning controls, improved property accessors, and struct-based optional parameters.
+### C# 14
 
-## 2. Runtime and Performance
-.NET 10 is considered one of the fastest releases to date:
-* **JIT Compiler Enhancements**: Improvements in method inlining, loop inversion, and more aggressive devirtualization.
-* **Hardware Acceleration**: Support for AVX10.2 (Intel) and Arm64 SVE (Scalable Vector Extension), alongside improved write-barrier handling reducing garbage collection (GC) pauses by 8–20%.
-* **Stack Allocation**: The JIT can now allocate small arrays (including reference type arrays) on the stack when they do not outlive their creation context, reducing heap allocation overhead.
-* **NativeAOT**: Continued improvements to reduce application size and startup times.
+Key C# 14 additions include:
 
-## 3. Web and Cloud-Native Development
-* **ASP.NET Core 10**:
-  * **Security & Identity**: Introduced passkey (FIDO2) support for authentication.
-  * **Minimal APIs**: Added support for validation and JSON Patch.
-  * **OpenAPI**: Enhanced support for OpenAPI 3.1.
-  * **Blazor**: Improvements include state persistence, optimized loading, and enhanced form validation.
-* **AI Integration**: Expanded support for building AI-powered applications through `Microsoft.Extensions.AI`, the Microsoft Agent Framework, and first-class Model Context Protocol (MCP) support.
-* **Aspire**: Updated to support better orchestration for front ends, APIs, and containers, including improved dashboard and deployment workflows.
+- **Extension members:** Static and instance extension members can be grouped in extension blocks.
+- **Field-backed properties:** The `field` contextual keyword gives property accessors access to the compiler-generated backing field.
+- **Null-conditional assignment:** Assign through `?.` when the receiver is not null.
+- **`nameof` improvements:** `nameof` supports unbound generic types such as `List<>`.
+- **Span conversions:** Improved implicit conversions for `Span<T>` and `ReadOnlySpan<T>`.
+- **Lambda parameter modifiers:** `ref`, `in`, and `out` can be used on simple lambda parameters.
+- **Partial members:** Support expands to partial constructors and events.
+- **User-defined operators:** Compound assignment and increment/decrement operators are supported.
 
-## 4. SDK and Tooling
-* **CLI Enhancements**: Standardized CLI command order and native tab-completion scripts.
-* **Testing**: Enhanced support for `Microsoft.Testing.Platform` (MTP) in `dotnet test`.
-* **Containerization**: Console applications can now natively create container images, with new options to explicitly set image formats.
-* **NuGet**: Continued focus on security with improvements to dependency auditing.
+### F# 10
+
+F# 10 focuses on language, compiler, and library improvements, including scoped warning controls, improved property accessors, and performance-oriented updates in the compiler and standard library.
+
+## Runtime and Performance
+
+.NET 10 includes runtime improvements across:
+
+- **JIT optimization:** Better inlining, loop inversion, devirtualization, and code generation.
+- **Hardware acceleration:** AVX10.2 support and continued Arm64 optimization.
+- **Stack allocation:** More opportunities for short-lived objects and arrays to avoid heap allocation.
+- **NativeAOT:** Continued improvements to application size and startup time.
+- **Garbage collection:** Ongoing tuning to reduce pause time and improve throughput.
+
+## Web and Cloud-Native Development
+
+ASP.NET Core 10 includes updates across:
+
+- **Security and identity:** Passkey/FIDO2 support for authentication scenarios.
+- **Minimal APIs:** Validation and JSON Patch improvements.
+- **OpenAPI:** Enhanced OpenAPI support, including OpenAPI 3.1.
+- **Blazor:** State persistence, loading, diagnostics, and form validation improvements.
+
+.NET 10 also continues expanding support for AI and cloud-native applications through `Microsoft.Extensions.AI`, Aspire, and Model Context Protocol (MCP)-related tooling.
+
+## SDK and Tooling
+
+Notable SDK updates include:
+
+- Standardized `dotnet` CLI command ordering.
+- Native tab-completion scripts for popular shells.
+- Better `Microsoft.Testing.Platform` support in `dotnet test`.
+- Improved support for file-based apps and one-shot tool execution.
+- Continued NuGet security and dependency auditing improvements.
+
+## Project Note
+
+This repo currently targets .NET 8 in the main tutorial services. Treat these .NET 10 notes as upgrade research rather than current project requirements.

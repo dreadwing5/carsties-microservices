@@ -1,51 +1,52 @@
-# Microservice Delta Sync: HTTP Data Seeding
+# Delta Sync: HTTP Data Seeding
 
-When building distributed systems, maintaining a "Single Source of Truth" is critical. In our architecture, the **AuctionService** (and its Postgres database) is the definitive source of truth for all auction data. 
+`AuctionService` and its Postgres database are the source of truth for auction data.
 
-The **SearchService** uses a MongoDB database designed specifically to project and index this data for lightning-fast queries. However, the SearchService needs a reliable way to get its initial data and stay synchronized.
+`SearchService` keeps a MongoDB projection of that data so search queries can stay fast and independent. Because MongoDB is only a projection, it needs a reliable way to build its initial dataset and catch up when it has been offline.
 
-## The Problem: Full Synchronization
-If the SearchService relies on a hardcoded `auctions.json` file for initialization, it will immediately have stale data if any new auctions were created in the AuctionService since the JSON file was last updated.
+## Problem: Full Synchronization
 
-The naive solution is to have the SearchService make an HTTP request to the AuctionService on startup: `GET /api/auctions` to download the entire database. 
+If `SearchService` relied on a hardcoded `auctions.json` seed file, MongoDB would become stale as soon as new auctions were created in `AuctionService`.
 
-However, as the system grows to millions of records, a "Full Sync" becomes catastrophic:
-1. **Performance:** Sending gigabytes of JSON over the network is incredibly slow.
-2. **Resource Exhaustion:** It will spike the CPU and RAM of both microservices, potentially crashing them.
-3. **Database Load:** It executes a massive query against the Postgres database, degrading performance for actual end-users.
+A simple fix is to call `GET /api/auctions` on startup and download everything. That works for small datasets, but it does not scale well:
 
-## The Solution: Delta Sync (Date Filtering)
-To solve this, we use a **Delta Sync** approach utilizing an `UpdatedAt` timestamp.
+1. **Performance:** Large JSON responses are slow to transfer and deserialize.
+2. **Resource usage:** Both services spend CPU and memory handling records that may already exist in MongoDB.
+3. **Database load:** Postgres has to serve a large query even when only a few records changed.
 
-Instead of asking for everything, the SearchService performs the following workflow on startup:
+## Solution: Delta Sync
 
-1. **Check Local State:** The SearchService queries its own MongoDB to find the most recently updated item.
-   > *"The most recent auction I know about was updated on May 24th at 2:00 PM."*
+`SearchService` uses a delta sync based on the `UpdatedAt` timestamp.
 
-2. **Targeted Request:** It sends an HTTP request to the AuctionService with a date parameter.
-   > `GET /api/auctions?date=2026-05-24T14:00:00`
+On startup:
 
-3. **Optimized Response:** The AuctionService queries Postgres for **only** the records where `UpdatedAt > [Provided Date]`. 
-   > Instead of returning 10 million records, it instantly returns just the 5 records that were created or modified while the SearchService was offline.
+1. `SearchService` queries MongoDB for the most recent `UpdatedAt` value it already has.
+2. It calls `AuctionService` with that value: `GET /api/auctions?date=2026-05-24T14:00:00Z`.
+3. `AuctionService` returns only auctions where `UpdatedAt` is greater than the supplied date.
+4. `SearchService` upserts those records into MongoDB.
 
-### Benefits
-* **Speed:** Syncs take milliseconds instead of minutes.
-* **Resiliency:** If the SearchService's MongoDB database is ever completely wiped, the local state check returns `null`. The SearchService will then automatically fall back to a full sync, perfectly rebuilding its index from scratch without manual intervention.
-* **Network Efficiency:** Massively reduces bandwidth usage within the internal cluster network.
+If MongoDB is empty, the local state check returns no date. In that case, `SearchService` falls back to a full sync and rebuilds the projection from scratch.
 
-## Fault Tolerance and Resiliency
+## Benefits
 
-In a microservice architecture, it is completely normal and expected for a service to be temporarily unavailable (e.g., during a rolling deployment or a crash). 
+- **Fast normal startup:** Most syncs transfer only recently changed auctions.
+- **Self-healing projection:** A wiped MongoDB database can be rebuilt from `AuctionService`.
+- **Lower database pressure:** Postgres avoids repeated full-table sync requests.
+- **Lower network usage:** Internal traffic stays proportional to the number of changed records.
 
-If the **SearchService** attempts to perform its HTTP data sync on startup but the **AuctionService** is down, here is what happens:
-1. The HTTP Client throws an `HttpRequestException` (Connection Refused).
-2. The `SearchService` catches this exception in `Program.cs`, logs the error to the console, and gracefully continues its startup process.
-3. The `SearchService` remains functional and will serve search requests using whatever data it already has in its local MongoDB instance (or 0 items if the database is brand new).
+## Fault Tolerance
 
-### The Solution: Polly & Background Initialization
-To make this synchronization completely bulletproof, we implemented a two-part solution:
+Temporary service outages are normal in a microservice system. For example, `AuctionService` may be unavailable during a restart or deployment.
 
-1. **Polly Retry Policy:** We wrapped our HTTP Client with a Polly resilience policy. If the request fails (e.g., AuctionService is down), Polly automatically waits 3 seconds and retries indefinitely until the AuctionService comes back online.
-2. **Background Sync (`ApplicationStarted`):** If we awaited the database initialization during startup, the Polly retry loop would block the SearchService from booting! To solve this, we wrapped the initialization inside `app.Lifetime.ApplicationStarted.Register()`. 
+The current `SearchService` startup flow handles that with two pieces:
 
-This guarantees that the SearchService immediately finishes booting up, binds to its port, and can instantly serve requests using its old MongoDB data. Meanwhile, in the background, Polly silently retries until the AuctionService is available to sync the missing data.
+1. **Polly retry policy:** The HTTP client retries transient failures every 3 seconds until `AuctionService` becomes available.
+2. **Background initialization:** The sync starts inside `app.Lifetime.ApplicationStarted.Register(...)`, so the service can bind to its port before the sync completes.
+
+This means `SearchService` can continue serving whatever data already exists in MongoDB while the background sync retries.
+
+## Current Limitations
+
+- `UpdatedAt` must be maintained correctly for creates and updates. If an update does not change `UpdatedAt`, `SearchService` will not see it during delta sync.
+- The current flow only fetches auctions changed after the last known timestamp. Deletes need a separate event, tombstone, or soft-delete strategy to remove records from MongoDB.
+- Date values should stay in UTC to avoid timezone drift between services.
