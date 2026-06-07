@@ -10,6 +10,7 @@ using SearchService.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCarter();
+builder.Services.AddValidation();
 builder.Services.AddHttpClient<AuctionSvcHttpClient>().AddPolicyHandler(GetPolicy());
 
 builder.Services.AddMassTransit(x =>

@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using AuctionService.Data;
 using AuctionService.DTOs;
 using AuctionService.Extensions;
@@ -54,13 +53,6 @@ public class AuctionEndpoints : ICarterModule
 
     private static async Task<IResult> CreateAuction(AuctionDbContext context, CreateAuctionDto auctionDto)
     {
-        var validationErrors = Validate(auctionDto);
-
-        if (validationErrors.Count > 0)
-        {
-            return Results.ValidationProblem(validationErrors);
-        }
-
         var auction = auctionDto.ToEntity();
         auction.Seller = "test";
 
@@ -123,22 +115,5 @@ public class AuctionEndpoints : ICarterModule
         }
 
         return Results.Ok();
-    }
-
-    private static IDictionary<string, string[]> Validate<T>(T model)
-    {
-        var validationResults = new List<ValidationResult>();
-        var validationContext = new ValidationContext(model!);
-
-        Validator.TryValidateObject(model!, validationContext, validationResults, true);
-
-        return validationResults
-            .SelectMany(
-                result => result.MemberNames.DefaultIfEmpty(string.Empty),
-                (result, memberName) => new { memberName, result.ErrorMessage })
-            .GroupBy(x => x.memberName)
-            .ToDictionary(
-                group => group.Key,
-                group => group.Select(x => x.ErrorMessage ?? "The field is invalid.").ToArray());
     }
 }
