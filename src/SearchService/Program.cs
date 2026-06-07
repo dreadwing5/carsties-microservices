@@ -1,3 +1,4 @@
+using Carter;
 using MassTransit;
 using MongoDB.Driver;
 using MongoDB.Entities;
@@ -8,7 +9,7 @@ using SearchService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddCarter();
 builder.Services.AddHttpClient<AuctionSvcHttpClient>().AddPolicyHandler(GetPolicy());
 
 builder.Services.AddMassTransit(x =>
@@ -44,6 +45,6 @@ app.Lifetime.ApplicationStarted.Register(async () =>
     }
 });
 
-app.MapControllers();
+app.MapCarter();
 
 app.Run();

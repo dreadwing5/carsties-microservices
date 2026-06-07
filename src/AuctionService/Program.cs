@@ -1,12 +1,11 @@
-using AuctionService.Controllers;
 using AuctionService.Data;
+using Carter;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-builder.Services.AddControllers();
+builder.Services.AddCarter();
 builder.Services.AddDbContext<AuctionDbContext>(opt =>
 {
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -25,7 +24,7 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-app.MapControllers();
+app.MapCarter();
 
 try
 {

@@ -2,7 +2,7 @@
 
 This document collects engineering patterns that are useful for the broader Carsties microservices project.
 
-Some sections are future-facing reference material. The current tutorial services still use controllers, EF Core migrations, Postgres, MongoDB, RabbitMQ, and Docker Compose.
+Some sections are future-facing reference material. The current tutorial services use Minimal APIs with Carter, EF Core migrations, Postgres, MongoDB, RabbitMQ, and Docker Compose. See [Asynchronous communication](asynchronous_communication.md) for the dedicated RabbitMQ and MassTransit notes.
 
 ## Zero-Downtime Deployments and Health Checks
 

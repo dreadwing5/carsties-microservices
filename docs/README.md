@@ -7,6 +7,7 @@ This folder contains project notes for the Carsties microservices tutorial repo.
 - [Delta sync optimization](delta_sync_optimization.md): How `SearchService` seeds and refreshes its MongoDB projection from `AuctionService`.
 - [MongoDB text search](mongodb_text_search.md): How the current MongoDB full-text search works and when to consider a dedicated search engine.
 - [Elasticsearch search](elasticsearch_search.md): How Elasticsearch indexing, analysis, scoring, shards, replicas, and sync patterns work.
+- [Asynchronous communication](asynchronous_communication.md): RabbitMQ, MassTransit, events, commands, reliability rules, and broker alternatives.
 - [Source-generated request processing](source_generated_request_processing.md): Azure Table batching, EF Core generic updates, and a source-generated dispatcher pattern.
 - [Docker concepts](docker_concepts.md): Short notes on Docker volumes used by the local database containers.
 

@@ -1,16 +1,19 @@
-using Microsoft.AspNetCore.Mvc;
+using Carter;
 using MongoDB.Entities;
 using SearchService.Models;
 using SearchService.RequestHelpers;
 
-namespace SearchService.Controllers;
+namespace SearchService.Endpoints;
 
-[ApiController]
-[Route("api/search")]
-public class SearchController : ControllerBase
+public class SearchEndpoints : ICarterModule
 {
-    [HttpGet]
-    public async Task<ActionResult<dynamic>> SearchItems([FromQuery] SearchParams searchParams)
+    public void AddRoutes(IEndpointRouteBuilder app)
+    {
+        app.MapGet("/api/search", SearchItems)
+            .WithName(nameof(SearchItems));
+    }
+
+    private static async Task<IResult> SearchItems([AsParameters] SearchParams searchParams)
     {
         var query = DB.Default.PagedSearch<Item, Item>();
 
@@ -43,12 +46,15 @@ public class SearchController : ControllerBase
             query.Match(x => x.Winner == searchParams.Winner);
         }
 
-        query.PageNumber(searchParams.PageNumber);
-        query.PageSize(Math.Min(searchParams.PageSize, 50));
+        var pageNumber = searchParams.PageNumber ?? 1;
+        var pageSize = searchParams.PageSize ?? 4;
+
+        query.PageNumber(pageNumber);
+        query.PageSize(Math.Min(pageSize, 50));
 
         var result = await query.ExecuteAsync();
 
-        return Ok(new
+        return Results.Ok(new
         {
             results = result.Results,
             pageCount = result.PageCount,

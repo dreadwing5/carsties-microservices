@@ -207,7 +207,7 @@ Common sync options:
 - **Delta sync:** A background job periodically fetches records changed after the latest known `UpdatedAt`.
 - **Rebuild job:** If the index is corrupted or mappings change, rebuild the full index from Postgres.
 
-For Carsties, event-driven indexing fits naturally because the project already uses RabbitMQ/MassTransit patterns.
+For Carsties, event-driven indexing fits naturally with the RabbitMQ/MassTransit approach described in [Asynchronous communication](asynchronous_communication.md).
 
 ## Deletes and Rebuilds
 
