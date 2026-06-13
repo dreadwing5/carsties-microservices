@@ -31,7 +31,7 @@ Before a slot swap, the platform should call `GET /healthz`. The endpoint should
 
 ## Database Migration Strategy
 
-The current tutorial service uses **EF Core migrations** for `AuctionService`. Keep migrations small, reviewable, and tied to the service that owns the database.
+The current tutorial service uses **EF Core migrations** for `Carsties.AuctionService`. Keep migrations small, reviewable, and tied to the service that owns the database.
 
 ### Local Development Isolation
 
@@ -190,7 +190,7 @@ Carter is an optional Minimal API organization library. Endpoints are defined by
 ```csharp
 using Carter;
 
-namespace AuctionService.Endpoints;
+namespace Carsties.AuctionService.Endpoints;
 
 public class AuctionEndpoints : ICarterModule
 {

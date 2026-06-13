@@ -1,6 +1,6 @@
 # MongoDB Text Search: Under the Hood
 
-`SearchService` performs MongoDB full-text search with `.Match(Search.Full, searchTerm).SortByTextScore()`. MongoDB handles this using ideas borrowed from classical search engines: inverted indexes, term scoring, and relevance-based sorting.
+`Carsties.SearchService` performs MongoDB full-text search with `.Match(Search.Full, searchTerm).SortByTextScore()`. MongoDB handles this using ideas borrowed from classical search engines: inverted indexes, term scoring, and relevance-based sorting.
 
 ## Inverted Index
 

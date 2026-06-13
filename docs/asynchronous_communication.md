@@ -25,11 +25,11 @@ Tradeoffs:
 
 The local infrastructure in `docker-compose.yml` includes:
 
-- `postgres` for `AuctionService`
-- `mongodb` for `SearchService`
+- `postgres` for `Carsties.AuctionService`
+- `mongodb` for `Carsties.SearchService`
 - `rabbitmq` for asynchronous messaging
 
-Both `AuctionService` and `SearchService` reference `MassTransit.RabbitMQ` and register a RabbitMQ bus in `Program.cs`.
+Both `Carsties.AuctionService` and `Carsties.SearchService` reference `MassTransit.RabbitMQ` and register a RabbitMQ bus in `Program.cs`.
 
 ```csharp
 builder.Services.AddMassTransit(x =>
@@ -41,7 +41,7 @@ builder.Services.AddMassTransit(x =>
 });
 ```
 
-The project currently has the messaging infrastructure wired, but the shared `Contracts` project does not yet define event contracts and the services do not yet publish or consume messages. The next natural step is to add integration events such as `AuctionCreated`, `AuctionUpdated`, and `AuctionDeleted`, then have `SearchService` consume those events to keep its MongoDB search projection up to date.
+The project currently has the messaging infrastructure wired, but the shared `Carsties.Contracts` project does not yet define event contracts and the services do not yet publish or consume messages. The next natural step is to add integration events such as `AuctionCreated`, `AuctionUpdated`, and `AuctionDeleted`, then have `Carsties.SearchService` consume those events to keep its MongoDB search projection up to date.
 
 This repo pins `MassTransit.RabbitMQ` to `8.5.5` to avoid the MassTransit `9.x` license requirement during local development.
 
@@ -103,20 +103,20 @@ public record RebuildSearchIndex(Guid AuctionId);
 
 A command name should be imperative: `RebuildSearchIndex`, `CancelAuction`, `NotifyBidWinner`.
 
-For Carsties, search projection updates should usually be events, because `AuctionService` should not know or care exactly which services react to auction changes.
+For Carsties, search projection updates should usually be events, because `Carsties.AuctionService` should not know or care exactly which services react to auction changes.
 
 ## Recommended Carsties Flow
 
 A typical event-driven update flow:
 
-1. A user creates an auction through `AuctionService`.
-2. `AuctionService` writes the auction to Postgres.
-3. `AuctionService` publishes `AuctionCreated`.
+1. A user creates an auction through `Carsties.AuctionService`.
+2. `Carsties.AuctionService` writes the auction to Postgres.
+3. `Carsties.AuctionService` publishes `AuctionCreated`.
 4. RabbitMQ routes the event to interested queues.
-5. `SearchService` consumes the event.
-6. `SearchService` updates its MongoDB search document.
+5. `Carsties.SearchService` consumes the event.
+6. `Carsties.SearchService` updates its MongoDB search document.
 
-This keeps Postgres as the source of truth and lets `SearchService` maintain its own read model.
+This keeps Postgres as the source of truth and lets `Carsties.SearchService` maintain its own read model.
 
 ## Reliability Rules
 
@@ -162,7 +162,7 @@ Use messaging when:
 
 When adding a new async workflow to Carsties:
 
-1. Add the message contract to `src/Contracts`.
+1. Add the message contract to `src/Shared/Carsties.Contracts`.
 2. Publish the event after the source-of-truth database write succeeds.
 3. Add a public MassTransit consumer in the receiving service.
 4. Register consumers with `AddConsumers(...)` or the repo's chosen registration style.

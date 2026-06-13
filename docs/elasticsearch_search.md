@@ -2,7 +2,7 @@
 
 Elasticsearch is a distributed search engine built on top of Apache Lucene. It is designed for fast full-text search, filtering, sorting, aggregations, and relevance ranking across large datasets.
 
-In a microservice system like Carsties, Elasticsearch would usually act as a **search projection**, not the source of truth. `AuctionService` and Postgres would still own auction data, while Elasticsearch would store a searchable copy optimized for user queries.
+In a microservice system like Carsties, Elasticsearch would usually act as a **search projection**, not the source of truth. `Carsties.AuctionService` and Postgres would still own auction data, while Elasticsearch would store a searchable copy optimized for user queries.
 
 ## Why Elasticsearch Exists
 
@@ -203,7 +203,7 @@ Elasticsearch should not be the source of truth for auction data. It should be u
 
 Common sync options:
 
-- **Event-driven indexing:** `AuctionService` publishes events such as `AuctionCreated`, `AuctionUpdated`, and `AuctionDeleted`. A search indexing consumer updates Elasticsearch.
+- **Event-driven indexing:** `Carsties.AuctionService` publishes events such as `AuctionCreated`, `AuctionUpdated`, and `AuctionDeleted`. A search indexing consumer updates Elasticsearch.
 - **Delta sync:** A background job periodically fetches records changed after the latest known `UpdatedAt`.
 - **Rebuild job:** If the index is corrupted or mappings change, rebuild the full index from Postgres.
 
@@ -289,12 +289,12 @@ MongoDB text search is simpler and works well early in a project. Elasticsearch 
 
 A production-ready Carsties search flow could look like this:
 
-1. User creates or updates an auction through `AuctionService`.
-2. `AuctionService` saves the change in Postgres.
-3. `AuctionService` publishes an event to RabbitMQ.
+1. User creates or updates an auction through `Carsties.AuctionService`.
+2. `Carsties.AuctionService` saves the change in Postgres.
+3. `Carsties.AuctionService` publishes an event to RabbitMQ.
 4. A search indexing consumer receives the event.
 5. The consumer indexes or updates the auction document in Elasticsearch.
-6. `SearchService` queries Elasticsearch instead of MongoDB for user search requests.
+6. `Carsties.SearchService` queries Elasticsearch instead of MongoDB for user search requests.
 
 This keeps Postgres as the source of truth while allowing Elasticsearch to focus on fast, high-quality search.
 
