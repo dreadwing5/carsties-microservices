@@ -74,7 +74,7 @@ public class AuctionEndpoints : ICarterModule
         }
 
         var newAuction = mapper.Map<AuctionDto>(auction);
-        await publishEndpoint.Publish(mapper.Map<AuctionCreated>(newAuction););
+        await publishEndpoint.Publish(mapper.Map<AuctionCreated>(newAuction));
 
         return Results.CreatedAtRoute(
             value: newAuction,
