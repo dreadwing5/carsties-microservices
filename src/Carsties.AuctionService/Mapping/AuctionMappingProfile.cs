@@ -26,7 +26,7 @@ public static class AuctionMappingProfile
             Color = auction.Item?.Color,
             Year = auction.Item?.Year ?? 0,
             Mileage = auction.Item?.Mileage ?? 0,
-            ImageUrl = auction.Item?.ImageUrl
+            ImageUrl = auction.Item?.ImageUrl,
         });
 
         registry.CreateMap<Auction, AuctionCreated>(auction => new AuctionCreated
@@ -46,7 +46,7 @@ public static class AuctionMappingProfile
             Color = auction.Item?.Color,
             Year = auction.Item?.Year ?? 0,
             Mileage = auction.Item?.Mileage ?? 0,
-            ImageUrl = auction.Item?.ImageUrl
+            ImageUrl = auction.Item?.ImageUrl,
         });
 
         registry.CreateMap<CreateAuctionDto, Auction>(dto => new Auction
@@ -61,8 +61,8 @@ public static class AuctionMappingProfile
                 Color = dto.Color,
                 Year = dto.Year,
                 Mileage = dto.Mileage,
-                ImageUrl = dto.ImageUrl
-            }
+                ImageUrl = dto.ImageUrl,
+            },
         });
     }
 }

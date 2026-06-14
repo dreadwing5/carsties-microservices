@@ -141,4 +141,3 @@ public class AuctionEndpoints : ICarterModule
         return Results.Ok();
     }
 }
-

@@ -9,14 +9,14 @@ public class DbInitializer
 {
     public static async Task InitDb(WebApplication app)
     {
-        _ = await DB.InitAsync(
+        await DB.InitAsync(
             "SearchDb",
             MongoClientSettings.FromConnectionString(
                 app.Configuration.GetConnectionString("MongoDbConnection")
             )
         );
 
-        _ = await DB
+        await DB
             .Default.Index<Item>()
             .Key(x => x.Make, KeyType.Text)
             .Key(x => x.Model, KeyType.Text)

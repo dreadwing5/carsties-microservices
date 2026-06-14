@@ -8,7 +8,7 @@ public static class SearchMappingProfile
 {
     public static void Configure(MapperRegistry registry)
     {
-        _ = registry.CreateMap<AuctionCreated, Item>(auction => new Item
+        registry.CreateMap<AuctionCreated, Item>(auction => new Item
         {
             ID = auction.Id.ToString(),
             ReservePrice = auction.ReservePrice,

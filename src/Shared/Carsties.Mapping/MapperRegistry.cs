@@ -17,7 +17,8 @@ public class MapperRegistry
     public bool TryGetMap(
         Type source,
         Type destination,
-        [MaybeNullWhen(false)] out Func<object, object?> mapFunc)
+        [MaybeNullWhen(false)] out Func<object, object?> mapFunc
+    )
     {
         return _maps.TryGetValue((source, destination), out mapFunc);
     }

@@ -12,7 +12,7 @@ builder.Services.AddAppMapper();
 
 builder.Services.AddDbContext<AuctionDbContext>(opt =>
 {
-    _ = opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddMassTransit(x =>
@@ -20,7 +20,7 @@ builder.Services.AddMassTransit(x =>
     x.AddEntityFrameworkOutbox<AuctionDbContext>(o =>
     {
         o.QueryDelay = TimeSpan.FromSeconds(10); // Check if there are messages  that has not been delivered yet
-        _ = o.UsePostgres();
+        o.UsePostgres();
         o.UseBusOutbox();
     });
 
@@ -48,4 +48,3 @@ catch (Exception e)
 }
 
 app.Run();
-

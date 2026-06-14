@@ -9,7 +9,7 @@ public class SearchEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        _ = app.MapGet("/api/search", SearchItems).WithName(nameof(SearchItems));
+        app.MapGet("/api/search", SearchItems).WithName(nameof(SearchItems));
     }
 
     private static async Task<IResult> SearchItems([AsParameters] SearchParams searchParams)
@@ -18,7 +18,7 @@ public class SearchEndpoints : ICarterModule
 
         if (!string.IsNullOrEmpty(searchParams.SearchTerm))
         {
-            _ = query.Match(Search.Full, searchParams.SearchTerm).SortByTextScore();
+            query.Match(Search.Full, searchParams.SearchTerm).SortByTextScore();
         }
 
         query = searchParams.OrderBy switch
@@ -41,12 +41,12 @@ public class SearchEndpoints : ICarterModule
 
         if (!string.IsNullOrEmpty(searchParams.Seller))
         {
-            _ = query.Match(x => x.Seller == searchParams.Seller);
+            query.Match(x => x.Seller == searchParams.Seller);
         }
 
         if (!string.IsNullOrEmpty(searchParams.Winner))
         {
-            _ = query.Match(x => x.Winner == searchParams.Winner);
+            query.Match(x => x.Winner == searchParams.Winner);
         }
 
         var pageNumber = searchParams.PageNumber ?? 1;

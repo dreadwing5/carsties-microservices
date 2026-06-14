@@ -20,28 +20,38 @@ builder.Services.AddMassTransit(x =>
 
     x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search", false));
 
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.ReceiveEndpoint("search-auction-created", e =>
+    x.UsingRabbitMq(
+        (context, cfg) =>
         {
-            e.UseMessageRetry(r => r.Interval(5, TimeSpan.FromSeconds(5)));
-            e.ConfigureConsumer<AuctionCreatedConsumer>(context);
-        });
-        cfg.ConfigureEndpoints(context);
-    });
+            cfg.ReceiveEndpoint(
+                "search-auction-created",
+                e =>
+                {
+                    e.UseMessageRetry(r => r.Interval(5, TimeSpan.FromSeconds(5)));
+                    e.ConfigureConsumer<AuctionCreatedConsumer>(context);
+                }
+            );
+            cfg.ConfigureEndpoints(context);
+        }
+    );
 });
 
 var app = builder.Build();
 
-static IAsyncPolicy<HttpResponseMessage> GetPolicy()
-    => HttpPolicyExtensions
+static IAsyncPolicy<HttpResponseMessage> GetPolicy() =>
+    HttpPolicyExtensions
         .HandleTransientHttpError()
         .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
-        .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(3), (outcome, retryCount, timeSpan) =>
-        {
-            Console.WriteLine($"Polly is retrying HTTP request. Carsties.AuctionService might be down. Waiting {timeSpan.TotalSeconds} seconds...");
-            return Task.CompletedTask;
-        });
+        .WaitAndRetryForeverAsync(
+            _ => TimeSpan.FromSeconds(3),
+            (outcome, retryCount, timeSpan) =>
+            {
+                Console.WriteLine(
+                    $"Polly is retrying HTTP request. Carsties.AuctionService might be down. Waiting {timeSpan.TotalSeconds} seconds..."
+                );
+                return Task.CompletedTask;
+            }
+        );
 
 app.UseHttpsRedirection();
 
