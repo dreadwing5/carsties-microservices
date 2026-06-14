@@ -9,8 +9,8 @@ public static class MappingServiceExtensions
         var registry = new MapperRegistry();
         SearchMappingProfile.Configure(registry);
 
-        services.AddSingleton(registry);
-        services.AddSingleton<IAppMapper, AppMapper>();
+        _ = services.AddSingleton(registry);
+        _ = services.AddSingleton<IAppMapper, AppMapper>();
 
         return services;
     }

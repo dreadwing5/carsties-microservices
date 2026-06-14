@@ -1,8 +1,7 @@
-using System.Text.Json;
-using MongoDB.Driver;
-using MongoDB.Entities;
 using Carsties.SearchService.Models;
 using Carsties.SearchService.Services;
+using MongoDB.Driver;
+using MongoDB.Entities;
 
 namespace Carsties.SearchService.Data;
 
@@ -10,10 +9,15 @@ public class DbInitializer
 {
     public static async Task InitDb(WebApplication app)
     {
-        await DB.InitAsync("SearchDb", MongoClientSettings.FromConnectionString(
-            app.Configuration.GetConnectionString("MongoDbConnection")));
+        _ = await DB.InitAsync(
+            "SearchDb",
+            MongoClientSettings.FromConnectionString(
+                app.Configuration.GetConnectionString("MongoDbConnection")
+            )
+        );
 
-        await DB.Default.Index<Item>()
+        _ = await DB
+            .Default.Index<Item>()
             .Key(x => x.Make, KeyType.Text)
             .Key(x => x.Model, KeyType.Text)
             .Key(x => x.Color, KeyType.Text)
@@ -30,7 +34,7 @@ public class DbInitializer
 
         if (items.Count > 0)
         {
-            await DB.Default.SaveAsync(items);
+            _ = await DB.Default.SaveAsync(items);
         }
     }
 }

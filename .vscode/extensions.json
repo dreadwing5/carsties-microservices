@@ -1,5 +1,6 @@
 {
   "recommendations": [
+    "csharpier.csharpier-vscode",
     "ms-dotnettools.csdevkit",
     "ms-dotnettools.csharp",
     "wayou.vscode-todo-highlight"

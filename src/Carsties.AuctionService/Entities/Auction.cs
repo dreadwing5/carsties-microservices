@@ -1,4 +1,4 @@
-﻿namespace Carsties.AuctionService.Entities;
+namespace Carsties.AuctionService.Entities;
 
 public class Auction
 {
@@ -18,7 +18,4 @@ public class Auction
     public Status Status { get; set; }
 
     public Item Item { get; set; }
-
-
-
 }

@@ -1,7 +1,7 @@
 using Carsties.AuctionService.DTOs;
 using Carsties.AuctionService.Entities;
-using Carsties.Mapping;
 using Carsties.Contracts;
+using Carsties.Mapping;
 
 namespace Carsties.AuctionService.Mapping;
 

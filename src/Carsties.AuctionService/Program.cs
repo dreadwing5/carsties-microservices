@@ -9,21 +9,30 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCarter();
 builder.Services.AddValidation();
 builder.Services.AddAppMapper();
+
 builder.Services.AddDbContext<AuctionDbContext>(opt =>
 {
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    _ = opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddMassTransit(x =>
 {
-    x.UsingRabbitMq((context, cfg) =>
+    x.AddEntityFrameworkOutbox<AuctionDbContext>(o =>
     {
-        cfg.ConfigureEndpoints(context);
+        o.QueryDelay = TimeSpan.FromSeconds(10); // Check if there are messages  that has not been delivered yet
+        _ = o.UsePostgres();
+        o.UseBusOutbox();
     });
+
+    x.UsingRabbitMq(
+        (context, cfg) =>
+        {
+            cfg.ConfigureEndpoints(context);
+        }
+    );
 });
 
 var app = builder.Build();
-
 
 app.UseHttpsRedirection();
 
@@ -39,3 +48,4 @@ catch (Exception e)
 }
 
 app.Run();
+

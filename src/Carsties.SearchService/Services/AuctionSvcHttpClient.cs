@@ -1,5 +1,5 @@
-using MongoDB.Entities;
 using Carsties.SearchService.Models;
+using MongoDB.Entities;
 
 namespace Carsties.SearchService.Services;
 

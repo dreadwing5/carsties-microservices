@@ -1,5 +1,5 @@
-using Carsties.Mapping;
 using Carsties.Contracts;
+using Carsties.Mapping;
 using Carsties.SearchService.Models;
 
 namespace Carsties.SearchService.Mapping;
@@ -8,7 +8,7 @@ public static class SearchMappingProfile
 {
     public static void Configure(MapperRegistry registry)
     {
-        registry.CreateMap<AuctionCreated, Item>(auction => new Item
+        _ = registry.CreateMap<AuctionCreated, Item>(auction => new Item
         {
             ID = auction.Id.ToString(),
             ReservePrice = auction.ReservePrice,
@@ -25,7 +25,7 @@ public static class SearchMappingProfile
             Color = auction.Color,
             Year = auction.Year,
             Mileage = auction.Mileage,
-            ImageUrl = auction.ImageUrl
+            ImageUrl = auction.ImageUrl,
         });
     }
 }
