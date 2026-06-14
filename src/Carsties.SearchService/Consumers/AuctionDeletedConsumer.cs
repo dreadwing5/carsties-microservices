@@ -5,10 +5,20 @@ using MongoDB.Entities;
 
 namespace Carsties.SearchService.Consumers;
 
-public class AuctionDeletedConsumer : IConsumer<AuctionDeleted>
+public class AuctionDeletedConsumer(ILogger<AuctionDeletedConsumer> logger)
+    : IConsumer<AuctionDeleted>
 {
     public async Task Consume(ConsumeContext<AuctionDeleted> context)
     {
-        await DB.Default.DeleteAsync<Item>(context.Message.Id.ToString());
+        logger.LogInformation(
+            "Received AuctionDeleted event for auction with ID: {AuctionId}",
+            context.Message.Id
+        );
+
+        var result = await DB.Default.DeleteAsync<Item>(context.Message.Id.ToString());
+
+        if (!result.IsAcknowledged)
+            throw new MessageException(typeof(AuctionDeleted), "Problem deleting auction");
     }
 }
+

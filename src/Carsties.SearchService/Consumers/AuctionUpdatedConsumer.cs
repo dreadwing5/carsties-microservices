@@ -1,29 +1,41 @@
 using Carsties.Contracts;
+using Carsties.Mapping;
 using Carsties.SearchService.Models;
 using MassTransit;
 using MongoDB.Entities;
 
 namespace Carsties.SearchService.Consumers;
 
-public class AuctionUpdatedConsumer : IConsumer<AuctionUpdated>
+public class AuctionUpdatedConsumer(IAppMapper _mapper, ILogger<AuctionUpdatedConsumer> _logger)
+    : IConsumer<AuctionUpdated>
 {
     public async Task Consume(ConsumeContext<AuctionUpdated> context)
     {
-        var message = context.Message;
-        var item = await DB.Default.Find<Item>().OneAsync(message.Id.ToString());
+        _logger.LogInformation(
+            "Received AuctionUpdated event for auction with ID: {AuctionId}",
+            context.Message.Id
+        );
 
-        if (item == null)
-        {
-            return;
-        }
+        var item = _mapper.Map<Item>(context.Message);
 
-        item.Make = message.Make ?? item.Make;
-        item.Model = message.Model ?? item.Model;
-        item.Color = message.Color ?? item.Color;
-        item.Year = message.Year ?? item.Year;
-        item.Mileage = message.Mileage ?? item.Mileage;
-        item.UpdatedAt = message.UpdatedAt;
+        var result = await DB
+            .Default.Update<Item>()
+            .Match(x => x.ID == item.ID)
+            .ModifyOnly(
+                x => new
+                {
+                    x.Make,
+                    x.Model,
+                    x.Color,
+                    x.Year,
+                    x.Mileage,
+                    x.UpdatedAt,
+                },
+                item
+            )
+            .ExecuteAsync();
 
-        await DB.Default.SaveAsync(item);
+        if (!result.IsAcknowledged)
+            throw new MessageException(typeof(AuctionUpdated), "Problem updating mongodb");
     }
 }

@@ -27,5 +27,16 @@ public static class SearchMappingProfile
             Mileage = auction.Mileage,
             ImageUrl = auction.ImageUrl,
         });
+
+        registry.CreateMap<AuctionUpdated, Item>(auction => new Item
+        {
+            ID = auction.Id.ToString(),
+            UpdatedAt = auction.UpdatedAt,
+            Make = auction.Make,
+            Model = auction.Model,
+            Color = auction.Color,
+            Year = auction.Year,
+            Mileage = auction.Mileage,
+        });
     }
 }
