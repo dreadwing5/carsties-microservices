@@ -1,3 +1,4 @@
+using Carsties.AuctionService.Consumers;
 using Carsties.AuctionService.Data;
 using Carsties.AuctionService.Mapping;
 using Carter;
@@ -23,6 +24,9 @@ builder.Services.AddMassTransit(x =>
         o.UsePostgres();
         o.UseBusOutbox();
     });
+
+    x.AddConsumersFromNamespaceContaining<AuctionCreatedFaultConsumer>();
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter(prefix: "carsties"));
 
     x.UsingRabbitMq(
         (context, cfg) =>
