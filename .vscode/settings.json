@@ -1,0 +1,53 @@
+{
+  "editor.formatOnSave": true,
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp"
+  },
+  "omnisharp.enableEditorConfigSupport": true,
+  "omnisharp.enableRoslynAnalyzers": true,
+  "todohighlight.keywords": [
+    {
+      "text": "TODO",
+      "color": "#ffffff",
+      "backgroundColor": "#2563eb",
+      "overviewRulerColor": "#2563eb"
+    },
+    {
+      "text": "FIX",
+      "color": "#ffffff",
+      "backgroundColor": "#dc2626",
+      "overviewRulerColor": "#dc2626"
+    },
+    {
+      "text": "FIXME",
+      "color": "#ffffff",
+      "backgroundColor": "#dc2626",
+      "overviewRulerColor": "#dc2626"
+    },
+    {
+      "text": "HACK",
+      "color": "#111827",
+      "backgroundColor": "#f59e0b",
+      "overviewRulerColor": "#f59e0b"
+    },
+    {
+      "text": "NOTE",
+      "color": "#ffffff",
+      "backgroundColor": "#16a34a",
+      "overviewRulerColor": "#16a34a"
+    },
+    {
+      "text": "BUG",
+      "color": "#ffffff",
+      "backgroundColor": "#be123c",
+      "overviewRulerColor": "#be123c"
+    },
+    {
+      "text": "OPTIMIZE",
+      "color": "#111827",
+      "backgroundColor": "#facc15",
+      "overviewRulerColor": "#facc15"
+    }
+  ],
+  "todohighlight.isCaseSensitive": true
+}
