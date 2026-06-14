@@ -91,6 +91,8 @@ public class AuctionEndpoints : ICarterModule
 
     private static async Task<IResult> UpdateAuction(
         AuctionDbContext _context,
+        IPublishEndpoint _publishEndpoint,
+        IAppMapper _mapper,
         Guid id,
         UpdateAuctionDto auctionDto
     )
@@ -109,6 +111,9 @@ public class AuctionEndpoints : ICarterModule
         auction.Item.Color = auctionDto.Color ?? auction.Item.Color;
         auction.Item.Year = auctionDto.Year ?? auction.Item.Year;
         auction.Item.Mileage = auctionDto.Mileage ?? auction.Item.Mileage;
+        auction.UpdatedAt = DateTime.UtcNow;
+
+        await _publishEndpoint.Publish(_mapper.Map<AuctionUpdated>(auction));
 
         var result = await _context.SaveChangesAsync() > 0;
 
@@ -120,7 +125,11 @@ public class AuctionEndpoints : ICarterModule
         return Results.Ok();
     }
 
-    private static async Task<IResult> DeleteAuction(AuctionDbContext _context, Guid id)
+    private static async Task<IResult> DeleteAuction(
+        AuctionDbContext _context,
+        IPublishEndpoint _publishEndpoint,
+        Guid id
+    )
     {
         var auction = await _context.Auctions.FindAsync(id);
 
@@ -130,6 +139,8 @@ public class AuctionEndpoints : ICarterModule
         }
 
         _context.Auctions.Remove(auction);
+
+        await _publishEndpoint.Publish(new AuctionDeleted { Id = id });
 
         var result = await _context.SaveChangesAsync() > 0;
 

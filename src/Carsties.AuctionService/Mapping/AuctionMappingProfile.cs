@@ -49,6 +49,17 @@ public static class AuctionMappingProfile
             ImageUrl = auction.Item?.ImageUrl,
         });
 
+        registry.CreateMap<Auction, AuctionUpdated>(auction => new AuctionUpdated
+        {
+            Id = auction.Id,
+            UpdatedAt = auction.UpdatedAt,
+            Make = auction.Item?.Make,
+            Model = auction.Item?.Model,
+            Color = auction.Item?.Color,
+            Year = auction.Item?.Year,
+            Mileage = auction.Item?.Mileage,
+        });
+
         registry.CreateMap<CreateAuctionDto, Auction>(dto => new Auction
         {
             ReservePrice = dto.ReservePrice,

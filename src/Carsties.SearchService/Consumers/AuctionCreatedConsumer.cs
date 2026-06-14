@@ -12,9 +12,9 @@ public class AuctionCreatedConsumer(IAppMapper _mapper) : IConsumer<AuctionCreat
     {
         var item = _mapper.Map<Item>(context.Message);
 
-        if (item.Model == "Foo")
-            throw new ArgumentException("Cannot sell cars with the name of Foo");
+        // if (item.Model == "Foo")
+        //     throw new ArgumentException("Cannot sell cars with the name of Foo"); //NOTE: This is for demonstration purposes only to show  how failures are handled in Masstransit.
 
-        await DB.Default.SaveAsync(item); // NOTE: What is this fails?
+        await DB.Default.SaveAsync(item); // NOTE: What if this fails?
     }
 }
