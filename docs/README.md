@@ -5,6 +5,7 @@ This folder contains project notes for the Carsties microservices tutorial repo.
 ## Current Project Docs
 
 - [Delta sync optimization](delta_sync_optimization.md): How `Carsties.SearchService` seeds and refreshes its MongoDB projection from `Carsties.AuctionService`.
+- [Fault tolerance and data consistency](fault_tolerance_consistency.md): How the EF outbox, RabbitMQ, retries, fault consumers, and startup sync keep auction/search data eventually consistent.
 - [MongoDB text search](mongodb_text_search.md): How the current MongoDB full-text search works and when to consider a dedicated search engine.
 - [Elasticsearch search](elasticsearch_search.md): How Elasticsearch indexing, analysis, scoring, shards, replicas, and sync patterns work.
 - [Asynchronous communication](asynchronous_communication.md): RabbitMQ, MassTransit, events, commands, reliability rules, and broker alternatives.
