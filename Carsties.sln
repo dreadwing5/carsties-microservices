@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -13,7 +12,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carsties.Contracts", "src\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carsties.SearchService", "src\Carsties.SearchService\Carsties.SearchService.csproj", "{3751880E-999C-476E-936F-09926B628FFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carsites.IdentityService", "src\Carsites.IdentityService\Carsites.IdentityService.csproj", "{F76350BE-1589-46C2-8E6F-055956F33087}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carsties.IdentityService", "src\Carsties.IdentityService\Carsties.IdentityService.csproj", "{F76350BE-1589-46C2-8E6F-055956F33087}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

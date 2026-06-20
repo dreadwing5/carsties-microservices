@@ -15,5 +15,6 @@ This folder contains project notes for the Carsties microservices tutorial repo.
 
 ## Reference Notes
 
+- [.NET field notes](dotnet_field_notes.md): Small .NET and C# idioms, guard clauses, gotchas, and lessons collected while building the project.
 - [.NET 10 features](dotnet_10_features.md): Summary of .NET 10, C# 14, ASP.NET Core, SDK, and tooling updates.
 - [Engineering standards and architecture patterns](engineering_standards_architecture.md): Future-facing engineering guidance. Some sections describe patterns that are not yet implemented in this repo.

@@ -1,0 +1,56 @@
+@page
+@model Carsties.IdentityService.Pages.Account.Register.Index
+
+<div class="register-page">
+    <div class="lead">
+        <h1>Register</h1>
+        <p>Create a local account</p>
+    </div>
+
+    <partial name="_ValidationSummary" />
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Local Account</h2>
+                </div>
+
+                <div class="card-body">
+                    <form method="post" asp-page="/Account/Register/Index">
+                        <input type="hidden" asp-for="Input.ReturnUrl" />
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Username"></label>
+                            <input class="form-control" asp-for="Input.Username" autocomplete="username" autofocus />
+                            <span class="text-danger" asp-validation-for="Input.Username"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Email"></label>
+                            <input class="form-control" asp-for="Input.Email" autocomplete="email" />
+                            <span class="text-danger" asp-validation-for="Input.Email"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Password"></label>
+                            <input class="form-control" asp-for="Input.Password" autocomplete="new-password" />
+                            <span class="text-danger" asp-validation-for="Input.Password"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.ConfirmPassword"></label>
+                            <input class="form-control" asp-for="Input.ConfirmPassword" autocomplete="new-password" />
+                            <span class="text-danger" asp-validation-for="Input.ConfirmPassword"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Register</button>
+                        <a class="btn btn-secondary"
+                           asp-page="/Account/Login/Index"
+                           asp-route-returnUrl="@Model.Input.ReturnUrl">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

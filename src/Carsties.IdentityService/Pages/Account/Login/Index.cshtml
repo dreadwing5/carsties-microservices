@@ -1,0 +1,125 @@
+@page
+@model Carsties.IdentityService.Pages.Account.Login.Index
+@{
+    ViewData["Title"] = "Sign in";
+    ViewData["BodyClass"] = "login-body";
+}
+
+<main class="login-page">
+    <section class="login-showcase" aria-label="Welcome to Carsties">
+        <a class="login-brand" href="~/" aria-label="Carsties home">
+            <span class="login-brand-mark" aria-hidden="true">
+                <i class="bi bi-car-front-fill"></i>
+            </span>
+            <span>Carsties</span>
+        </a>
+
+        <div class="login-showcase-content">
+            <span class="login-eyebrow">Your next great drive</span>
+            <h1>Find it. Bid on it.<br />Make it yours.</h1>
+            <p>Sign in to follow auctions, place bids, and keep your garage moving.</p>
+        </div>
+
+        <div class="login-trust-row" aria-label="Marketplace benefits">
+            <span><i class="bi bi-shield-check" aria-hidden="true"></i> Secure bidding</span>
+            <span><i class="bi bi-lightning-charge" aria-hidden="true"></i> Live auctions</span>
+        </div>
+    </section>
+
+    <section class="login-panel">
+        <div class="login-panel-inner">
+            <div class="login-mobile-brand" aria-hidden="true">
+                <span class="login-brand-mark"><i class="bi bi-car-front-fill"></i></span>
+                <span>Carsties</span>
+            </div>
+
+            <header class="login-heading">
+                <span class="login-eyebrow">Welcome back</span>
+                <h2>Sign in to your account</h2>
+                <p>Enter your details to pick up where you left off.</p>
+            </header>
+
+            <partial name="_ValidationSummary" />
+
+            @if (Model.View.EnableLocalLogin)
+            {
+                <form class="login-form" asp-page="/Account/Login/Index">
+                    <input type="hidden" asp-for="Input.ReturnUrl" />
+
+                    <div class="login-field">
+                        <label asp-for="Input.Username">Username</label>
+                        <div class="login-input-wrap">
+                            <i class="bi bi-person" aria-hidden="true"></i>
+                            <input class="form-control"
+                                   asp-for="Input.Username"
+                                   placeholder="Enter your username"
+                                   autocomplete="username"
+                                   autofocus />
+                        </div>
+                        <span class="text-danger" asp-validation-for="Input.Username"></span>
+                    </div>
+
+                    <div class="login-field">
+                        <label asp-for="Input.Password">Password</label>
+                        <div class="login-input-wrap">
+                            <i class="bi bi-lock" aria-hidden="true"></i>
+                            <input class="form-control"
+                                   asp-for="Input.Password"
+                                   placeholder="Enter your password"
+                                   autocomplete="current-password" />
+                        </div>
+                        <span class="text-danger" asp-validation-for="Input.Password"></span>
+                    </div>
+
+                    @if (Model.View.AllowRememberLogin)
+                    {
+                        <div class="login-options">
+                            <div class="form-check">
+                                <input class="form-check-input" asp-for="Input.RememberLogin" />
+                                <label class="form-check-label" asp-for="Input.RememberLogin">Keep me signed in</label>
+                            </div>
+                        </div>
+                    }
+
+                    <button class="btn login-submit" name="Input.Button" value="login">
+                        Sign in
+                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </button>
+
+                    <button class="login-cancel" name="Input.Button" value="cancel">Cancel and go back</button>
+                </form>
+
+                <p class="login-register">
+                    New to Carsties?
+                    <a asp-page="/Account/Register/Index" asp-route-returnUrl="@Model.Input.ReturnUrl">Create an account</a>
+                </p>
+            }
+
+            @if (Model.View.VisibleExternalProviders.Any())
+            {
+                <div class="login-divider"><span>or continue with</span></div>
+                <div class="login-providers">
+                    @foreach (var provider in Model.View.VisibleExternalProviders)
+                    {
+                        <a class="login-provider"
+                           asp-page="/ExternalLogin/Challenge"
+                           asp-route-scheme="@provider.AuthenticationScheme"
+                           asp-route-returnUrl="@Model.Input.ReturnUrl">
+                            <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+                            @provider.DisplayName
+                        </a>
+                    }
+                </div>
+            }
+
+            @if (!Model.View.EnableLocalLogin && !Model.View.VisibleExternalProviders.Any())
+            {
+                <div class="alert alert-warning" role="alert">
+                    <strong>Sign-in unavailable.</strong> There are no login methods configured for this request.
+                </div>
+            }
+
+            <p class="login-security"><i class="bi bi-lock-fill" aria-hidden="true"></i> Your connection is secure and encrypted.</p>
+        </div>
+    </section>
+</main>

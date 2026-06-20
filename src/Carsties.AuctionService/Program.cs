@@ -1,8 +1,10 @@
 using Carsties.AuctionService.Consumers;
 using Carsties.AuctionService.Data;
 using Carsties.AuctionService.Mapping;
+using Carsties.AuctionService.Services;
 using Carter;
 using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCarter();
 builder.Services.AddValidation();
 builder.Services.AddAppMapper();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 builder.Services.AddDbContext<AuctionDbContext>(opt =>
 {
@@ -36,9 +40,36 @@ builder.Services.AddMassTransit(x =>
     );
 });
 
+builder
+    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["IdentityServerUrl"];
+        options.RequireHttpsMetadata = false; // IdentityServerUrl is http in development, so we disable this check. Do not do this in production.
+        options.TokenValidationParameters.ValidateAudience = false;
+        options.TokenValidationParameters.NameClaimType = "username";
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(
+        AuthorizationPolicies.UserWithUsername,
+        policy =>
+        {
+            policy.RequireAuthenticatedUser();
+            policy.RequireAssertion(context =>
+                !string.IsNullOrWhiteSpace(context.User.Identity?.Name)
+            );
+        }
+    );
+});
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapCarter();
 

@@ -57,3 +57,7 @@ nunit-*.xml
 .vs/
 Carsties.sln.DotSettings.user
 src/AuctionService/AuctionService.csproj.user
+
+# IdentityServer runtime diagnostics and private signing keys
+src/Carsties.IdentityService/diagnostics/
+src/Carsties.IdentityService/keys/

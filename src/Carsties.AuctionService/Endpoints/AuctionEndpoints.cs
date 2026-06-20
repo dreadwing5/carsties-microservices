@@ -1,6 +1,7 @@
 using Carsties.AuctionService.Data;
 using Carsties.AuctionService.DTOs;
 using Carsties.AuctionService.Entities;
+using Carsties.AuctionService.Services;
 using Carsties.Contracts;
 using Carsties.Mapping;
 using Carter;
@@ -19,11 +20,20 @@ public class AuctionEndpoints : ICarterModule
 
         group.MapGet("/{id:guid}", GetAuctionById).WithName(nameof(GetAuctionById));
 
-        group.MapPost("", CreateAuction).WithName(nameof(CreateAuction));
+        group
+            .MapPost("", CreateAuction)
+            .RequireAuthorization(AuthorizationPolicies.UserWithUsername)
+            .WithName(nameof(CreateAuction));
 
-        group.MapPut("/{id:guid}", UpdateAuction).WithName(nameof(UpdateAuction));
+        group
+            .MapPut("/{id:guid}", UpdateAuction)
+            .RequireAuthorization(AuthorizationPolicies.UserWithUsername)
+            .WithName(nameof(UpdateAuction));
 
-        group.MapDelete("/{id:guid}", DeleteAuction).WithName(nameof(DeleteAuction));
+        group
+            .MapDelete("/{id:guid}", DeleteAuction)
+            .RequireAuthorization(AuthorizationPolicies.UserWithUsername)
+            .WithName(nameof(DeleteAuction));
     }
 
     private static async Task<IResult> GetAllAuctions(
@@ -63,12 +73,13 @@ public class AuctionEndpoints : ICarterModule
         AuctionDbContext _context,
         IPublishEndpoint _publishEndpoint,
         IAppMapper _mapper,
+        ICurrentUser currentUser,
         CreateAuctionDto auctionDto
     )
     {
         var auction = _mapper.Map<Auction>(auctionDto);
-        auction.Seller = "test";
 
+        auction.Seller = currentUser.Username;
         _context.Auctions.Add(auction);
 
         var newAuction = _mapper.Map<AuctionDto>(auction);
@@ -94,6 +105,7 @@ public class AuctionEndpoints : ICarterModule
         IPublishEndpoint _publishEndpoint,
         IAppMapper _mapper,
         Guid id,
+        ICurrentUser currentUser,
         UpdateAuctionDto auctionDto
     )
     {
@@ -104,6 +116,11 @@ public class AuctionEndpoints : ICarterModule
         if (auction == null)
         {
             return Results.NotFound();
+        }
+
+        if (auction.Seller != currentUser.Username)
+        {
+            return Results.Forbid();
         }
 
         auction.Item.Make = auctionDto.Make ?? auction.Item.Make;
@@ -128,6 +145,7 @@ public class AuctionEndpoints : ICarterModule
     private static async Task<IResult> DeleteAuction(
         AuctionDbContext _context,
         IPublishEndpoint _publishEndpoint,
+        ICurrentUser currentUser,
         Guid id
     )
     {
@@ -136,6 +154,11 @@ public class AuctionEndpoints : ICarterModule
         if (auction == null)
         {
             return Results.NotFound();
+        }
+
+        if (auction.Seller != currentUser.Username)
+        {
+            return Results.Forbid();
         }
 
         _context.Auctions.Remove(auction);
