@@ -10,6 +10,7 @@ This folder contains project notes for the Carsties microservices tutorial repo.
 - [Elasticsearch search](elasticsearch_search.md): How Elasticsearch indexing, analysis, scoring, shards, replicas, and sync patterns work.
 - [Asynchronous communication](asynchronous_communication.md): RabbitMQ, MassTransit, events, commands, reliability rules, and broker alternatives.
 - [Source-generated request processing](source_generated_request_processing.md): Azure Table batching, EF Core generic updates, and a source-generated dispatcher pattern.
+- [OAuth 2.0 and OpenID Connect](oauth_oidc.md): Authentication and authorization flows, tokens, sessions, refresh, MSAL, multiple tabs, BFF cookies, and XSS considerations.
 - [Docker concepts](docker_concepts.md): Short notes on Docker volumes used by the local database containers.
 
 ## Reference Notes
