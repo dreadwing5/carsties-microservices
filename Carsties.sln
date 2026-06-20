@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carsties.Contracts", "src\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carsties.SearchService", "src\Carsties.SearchService\Carsties.SearchService.csproj", "{3751880E-999C-476E-936F-09926B628FFC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carsites.IdentityService", "src\Carsites.IdentityService\Carsites.IdentityService.csproj", "{F76350BE-1589-46C2-8E6F-055956F33087}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,18 @@ Global
 		{3751880E-999C-476E-936F-09926B628FFC}.Release|x64.Build.0 = Release|Any CPU
 		{3751880E-999C-476E-936F-09926B628FFC}.Release|x86.ActiveCfg = Release|Any CPU
 		{3751880E-999C-476E-936F-09926B628FFC}.Release|x86.Build.0 = Release|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Debug|x64.Build.0 = Debug|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Debug|x86.Build.0 = Debug|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Release|x64.ActiveCfg = Release|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Release|x64.Build.0 = Release|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Release|x86.ActiveCfg = Release|Any CPU
+		{F76350BE-1589-46C2-8E6F-055956F33087}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,5 +94,6 @@ Global
 		{9C805F33-A612-4BC2-8D26-71AC7FE8E65C} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{39D32CB1-EFE1-48AC-AC1E-78AD74A60673} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{3751880E-999C-476E-936F-09926B628FFC} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{F76350BE-1589-46C2-8E6F-055956F33087} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal
